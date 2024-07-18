@@ -1,7 +1,5 @@
 <?php get_header(); ?>
 
-
-
 <!-- Product List Start -->
 <div class="product-view">
     <div class="container-fluid">
@@ -9,10 +7,17 @@
             <div class="col-lg-8">
                 <div class="row">
                     <?php
+                    $paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
                     $args = array(
                         'post_type' => 'post',  // Mostrar entradas estándar de WordPress
                         'posts_per_page' => 6,  // Número de entradas por página que quieres mostrar
+                        'paged' => $paged,
                     );
+
+                    if (is_category() || is_tag()) {
+                        $args['category_name'] = get_query_var('category_name');
+                        $args['tag'] = get_query_var('tag');
+                    }
 
                     $query = new WP_Query($args);
 
@@ -34,24 +39,43 @@
                                         </div>
                                     </div>
                                     <div class="product-price">
-                                        <h3><span>$</span> <?php the_excerpt();?></h3>
+                                        <h3><?php the_excerpt(); ?></h3>
                                         <a class="btn" href="<?php the_permalink(); ?>"><i class="fa fa-shopping-cart"></i>Buy Now</a>
                                     </div>
                                 </div>
                             </div>
-
-                    <?php
+                        <?php
                         endwhile;
-                        wp_reset_postdata();
-                    endif;
-                    ?>
+                        ?>
                 </div>
+
+                <!-- Pagination Start -->
+                <div class="col-md-12">
+                    <nav aria-label="Page navigation example">
+                        <?php
+                        echo paginate_links(array(
+                            'total' => $query->max_num_pages,
+                            'current' => $paged,
+                            'prev_text' => __('Previous'),
+                            'next_text' => __('Next'),
+                        ));
+                        ?>
+                    </nav>
+                </div>
+                <!-- Pagination End -->
+
+            <?php
+                        wp_reset_postdata();
+                    else:
+                        echo '<p>No posts found.</p>';
+                    endif;
+            ?>
             </div>
 
             <!-- Side Bar Start -->
             <div class="col-lg-4 sidebar">
                 <div class="sidebar-widget category">
-                    <h2 class="title">Categorias</h2>
+                    <h2 class="title">Categorías</h2>
                     <nav class="navbar bg-light">
                         <ul class="navbar-nav">
                             <?php
@@ -80,6 +104,7 @@
                 </div>
             </div>
             <!-- Side Bar End -->
+
         </div>
     </div>
 </div>
